@@ -1,15 +1,5 @@
-import hmac
-import base64
-from re import A
-from numpy import number
 import requests
-from datetime import datetime
-from hashlib import sha1
-from bs4 import BeautifulSoup
-import pandas as pd
-import time
-import json
-import random
+
 
 
 client_id = 's10811245-06dd52d5-3521-4239'
@@ -40,16 +30,16 @@ class TDX():
         return responsenew.json()
 
 
-def train(information):
+def train(train_time,starstation,endstation):
     tdx = TDX(client_id, client_secret)
     Station = {
-        '基隆':'900',
-        '八堵':'920',
-        '七堵':'930',
-        '五堵':'950',
-        '汐止':'960',
-        '南港':'980',
-        '松山':'990',
+        '基隆':'0900',
+        '八堵':'0920',
+        '七堵':'0930',
+        '五堵':'0950',
+        '汐止':'0960',
+        '南港':'0980',
+        '松山':'0990',
         '臺北':'1000',
         '台北':'1000',
         '萬華':'1010',
@@ -72,9 +62,9 @@ def train(information):
         '香山':'1230',
         '崎頂':'1240',
         '竹南':'1250',
-        '三坑':'910',
-        '百福':'940',
-        '汐科':'970',
+        '三坑':'0910',
+        '百福':'0940',
+        '汐科':'0970',
         '南樹林':'1050',
         '談文':'2110',
         '大山':'2120',
@@ -290,57 +280,48 @@ def train(information):
         '富貴':'1207',
         '內灣':'1208'
     }    
-    
-    #詢問資訊
-    TrainDate = information[0:5]
-    wanttime = information[6:11]
-    starstation = information[12:14]
-    endstation = information[15:17]
+    TrainDate = train_time[0:10]
+    wanttime = train_time[11:16]
     DestinationStationID = Station[endstation]
     OriginStationID = Station[starstation]
 
     #抓取車站看板即時資訊
+    result = []
+
     base_url = "https://tdx.transportdata.tw/api"
+    # https://tdx.transportdata.tw/api/basic/v2/Rail/TRA/LiveTrainDelay?%24format=JSON
+    endpoint = "/basic/v2/Rail/TRA/LiveTrainDelay"
+    url_new = f'{base_url}{endpoint}?%24format=JSON'
+    responsenew = tdx.get_response(url_new)
+    delay_list = []
+    for i in range(len(responsenew)):
+        delay_list.append([str(responsenew[i]['TrainNo']),str(responsenew[i]['DelayTime'])])
+    # print(delay_list)
     endpoint = "/basic/v2/Rail/TRA/LiveBoard/Station/"
     filter = "Direction eq " # 順逆行: [0:'順行', 1:'逆行']
-    #順向
-    url0 = f"{base_url}{endpoint}{OriginStationID}?$filter={filter}{0}&$format=JSON"
-    responsenew0 = tdx.get_response(url0)
-    #逆向
-    url1 = f"{base_url}{endpoint}{OriginStationID}?$filter={filter}{1}&$format=JSON"
-    responsenew1 = tdx.get_response(url1)
-    #抓取起迄點間出發時間後所有班次資料
+
     endpoint = '/basic/v2/Rail/TRA/DailyTimetable/OD/'
-    url2 = f'{base_url}{endpoint}{OriginStationID}/to/{DestinationStationID}/2022-{TrainDate}?%24format=JSON'
+    url2 = f'{base_url}{endpoint}{OriginStationID}/to/{DestinationStationID}/{TrainDate}?%24format=JSON'
     responsetoend = tdx.get_response(url2)
 
-    #輸出起終站站名、車次、列車類型、離站時間、抵達時間、延誤時間(僅三十分鐘內班次會有此資訊)
-    number = 1
+    #   輸出起終站站名、車次、列車類型、離站時間、抵達時間、延誤時間(僅三十分鐘內班次會有此資訊)
     for TrainNo in range(len(responsetoend)):
         Timehr = responsetoend[TrainNo]["OriginStopTime"]['DepartureTime'][0]  + responsetoend[TrainNo]["OriginStopTime"]['DepartureTime'][1]
         Timemin = responsetoend[TrainNo]["OriginStopTime"]['DepartureTime'][3]  + responsetoend[TrainNo]["OriginStopTime"]['DepartureTime'][4]
         if Timehr > wanttime[0]+wanttime[1] or (Timehr == wanttime[0]+wanttime[1] and Timemin >= wanttime[3]+wanttime[4]):
-            print(number,'------------------------------------------------------')
-            number+=1
-            print(responsetoend[TrainNo]["DailyTrainInfo"]['StartingStationName']['Zh_tw'],responsetoend[TrainNo]["DailyTrainInfo"]['StartingStationName']['En'],'->',responsetoend[TrainNo]["DailyTrainInfo"]['EndingStationName']['Zh_tw'],responsetoend[TrainNo]["DailyTrainInfo"]['EndingStationName']['En'])
-            print('行駛車次:',responsetoend[TrainNo]["DailyTrainInfo"]['TrainNo'])
 
-            Direction = False
-            for TrainNewNo in range(len(responsenew0)):
-                if responsetoend[TrainNo]["DailyTrainInfo"]['TrainNo'] == responsenew0[TrainNewNo]['TrainNo']:
-                    if responsenew0[TrainNewNo]['DelayTime'] != 0:
-                        print('列車將會晚',responsenew0[TrainNewNo]['DelayTime'],'分鐘進站\n誤點資訊為即時更新，此資訊僅供參考，確切時間請參考列車即時到離站電子看板')
-                    Direction = True
-            if not Direction:   
-                for TrainNewNo in range(len(responsenew1)):     
-                    if responsetoend[TrainNo]["DailyTrainInfo"]['TrainNo'] == responsenew1[TrainNewNo]['TrainNo']:
-                        if responsenew1[TrainNewNo]['DelayTime'] != 0:
-                            print('列車將會晚',responsenew1[TrainNewNo]['DelayTime'],'分鐘進站\n誤點資訊為即時更新，此資訊僅供參考，確切時間請參考列車即時到離站電子看板')
-            print('列車類型:',responsetoend[TrainNo]["DailyTrainInfo"]['TrainTypeName']['Zh_tw'])
-            print('搭乘時間:',responsetoend[TrainNo]["OriginStopTime"]['DepartureTime'],'->',responsetoend[TrainNo]["DestinationStopTime"]['ArrivalTime'])
-            print('搭乘備註:',responsetoend[TrainNo]["DailyTrainInfo"]['Note']['Zh_tw'])
+            Delay = ''
+            for i in range(len(delay_list)):
+                if responsetoend[TrainNo]["DailyTrainInfo"]['TrainNo'] == delay_list[i][0]:
+                    if delay_list[i][1] != '0':
+                        Delay = '誤點:'+str(delay_list[i][1])+'分'
+                        break
+                else:
+                    Delay = '準點'
+            result.append([responsetoend[TrainNo]["DailyTrainInfo"]['StartingStationName']['Zh_tw']+responsetoend[TrainNo]["DailyTrainInfo"]['StartingStationName']['En'],responsetoend[TrainNo]["DailyTrainInfo"]['EndingStationName']['Zh_tw']+responsetoend[TrainNo]["DailyTrainInfo"]['EndingStationName']['En'],responsetoend[TrainNo]["DailyTrainInfo"]['TrainNo'],Delay,responsetoend[TrainNo]["DailyTrainInfo"]['TrainTypeName']['Zh_tw'],responsetoend[TrainNo]["OriginStopTime"]['DepartureTime'],responsetoend[TrainNo]["DestinationStopTime"]['ArrivalTime'],responsetoend[TrainNo]["DailyTrainInfo"]['Note']['Zh_tw']])
+    return result
 
 
 if __name__ == '__main__':
-    information = input('MM-DD 24:00 起點 終點(請以24hr制輸入，資料間加入空格):')
-    train(information)
+    a = train('2022-12-07T01:59','松山','桃園')
+    print(a)
