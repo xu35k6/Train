@@ -309,22 +309,6 @@ if __name__ == '__main__':
     filter = "Direction eq " # 順逆行: [0:'順行', 1:'逆行']
     url = f"{base_url}{endpoint}{OriginStationID}?$filter={filter}{direction}&$format=JSON"
     response = tdx.get_response(url)
-    {# print('將顯示三十分鐘內即將進站之資訊')
-    # for i in range(len(alldata)):
-    #     print(i + 1,'---------------------------------------------------------')
-    #     print('站名:',response[i]['StationName']['Zh_tw'],response[i]['StationName']['En'])
-    #     print('行駛車次:',response[i]['TrainNo'])
-    #     # if response[i]['TrainTypeName']['Zh_tw'][0] == '普':
-    #     #     print('列車類型:',response[i]['TrainTypeName']['Zh_tw'][:3])
-    #     # else:
-    #     #     print('列車類型:',response[i]['TrainTypeName']['Zh_tw'][:2])
-    #     print('列車類型:',response[i]['TrainTypeName']['Zh_tw'])
-    #     print('終點站:',response[i]['EndingStationName']['Zh_tw'],response[i]['EndingStationName']['En'])
-    #     if response[i]['DelayTime'] == 0:
-    #         print('離站時間:',response[i]['ScheduledDepartureTime'][:5])
-    #     else:
-    #         print('原離站時間:',response[i]['ScheduledDepartureTime'][:5],'\n列車將會晚',response[i]['DelayTime'],'分鐘進站\n誤點資訊為即時更新，此資訊僅供參考，確切時間請參考列車即時到離站電子看板')
-    }
     
 
     ###抓取起迄點間出發時間後所有班次資料
