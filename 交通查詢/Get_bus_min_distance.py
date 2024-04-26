@@ -13,6 +13,7 @@ from Get_log_lat import Get_log_lat
 from bus import Get_bus
 from Transfer import tranfer
 #用google_map_api找出步行距離最近的10個站點
+google_api_key = ''
 def google_api(origins_Longitude,origins_Latitude,min_25):
     destinations = min_25[0][0]
     origins = str(origins_Latitude) + '+' + str(origins_Longitude)
@@ -22,7 +23,7 @@ def google_api(origins_Longitude,origins_Latitude,min_25):
         destinations += min_25[i][0]
         i+=1
     
-    url = "https://maps.googleapis.com/maps/api/distancematrix/json?mode=walking&origins="+origins+"&destinations="+destinations+"&units=METRIC&key=AIzaSyBTQF3-t4eDzNhiBUyaZLYFfGQxlQieFcU"
+    url = f"https://maps.googleapis.com/maps/api/distancematrix/json?mode=walking&origins="+origins+"&destinations="+destinations+"&units=METRIC&key={google_api_key}"
     payload={}
     headers = {}
 
