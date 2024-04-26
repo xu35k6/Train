@@ -41,6 +41,7 @@ class TDX():
 
 
 def Get_bus(num):
+    # bus0/1 代表順逆向
     tdx = TDX(client_id, client_secret)
 
     base_url = "https://tdx.transportdata.tw/api"
@@ -50,8 +51,7 @@ def Get_bus(num):
     
     url = f"{base_url}{endpoint}{OriginStationID}?$24format=JSON"
     response = tdx.get_response(url)
-    # for i in response:
-    #     print(i,'\n')
+
     if len(response) == 0:
         print('查無此班次資料')
         quit()
@@ -69,33 +69,29 @@ def Get_bus(num):
     bus_1 = Bus1()
     for i in range(len(response)):
         for j in range(len(response)):
-            if response[j]['Direction'] == 1:
-                if response[j]['StopSequence'] == i:
-                    if response[j]['StopSequence'] not in bus_1.num:
-                        bus_1.num.append(response[j]['StopSequence'])
-                        bus_1.name.append(response[j]['StopName']['Zh_tw'])
-                        try:
-                            bus_1.time.append('預計再過'+str(round(response[j]['Estimates'][0]['EstimateTime']/60))+'分進站')
-                        except:
-                            try:
-                                bus_1.time.append('下一班次預計'+response[j]['NextBusTime'][11:16]+'進站')
-                            except:
-                                bus_1.time.append( '休息')
+            if response[j]['Direction'] == 1 and response[j]['StopSequence'] == i and response[j]['StopSequence'] not in bus_1.num:
+                bus_1.num.append(response[j]['StopSequence'])
+                bus_1.name.append(response[j]['StopName']['Zh_tw'])
+                try:
+                    bus_1.time.append('預計再過'+str(round(response[j]['Estimates'][0]['EstimateTime']/60))+'分進站')
+                except:
+                    try:
+                        bus_1.time.append('下一班次預計'+response[j]['NextBusTime'][11:16]+'進站')
+                    except:
+                        bus_1.time.append( '休息')
     bus_0 = Bus0()
     for i in range(len(response)):
         for j in range(len(response)):
-            if response[j]['Direction'] == 0:
-                if response[j]['StopSequence'] == i:
-                    if response[j]['StopSequence'] not in bus_0.num:
-                        bus_0.num.append(response[j]['StopSequence'])
-                        bus_0.name.append(response[j]['StopName']['Zh_tw'])
-                        try:
-                            bus_0.time.append('預計再過'+str(round(response[j]['Estimates'][0]['EstimateTime']/60))+'分進站')
-                        except:
-                            try:
-                                bus_0.time.append('下一班次預計'+response[j]['NextBusTime'][11:16]+'進站')
-                            except:
-                               bus_0.time.append( '休息')
+            if response[j]['Direction'] == 0 and response[j]['StopSequence'] == i and response[j]['StopSequence'] not in bus_0.num :
+                bus_0.num.append(response[j]['StopSequence'])
+                bus_0.name.append(response[j]['StopName']['Zh_tw'])
+                try:
+                    bus_0.time.append('預計再過'+str(round(response[j]['Estimates'][0]['EstimateTime']/60))+'分進站')
+                except:
+                    try:
+                        bus_0.time.append('下一班次預計'+response[j]['NextBusTime'][11:16]+'進站')
+                    except:
+                       bus_0.time.append( '休息')
     return [bus_0,bus_1]
 
 if __name__ == '__main__':
