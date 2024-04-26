@@ -8,6 +8,8 @@ station = pd.read_csv(r"C:\python\交通查詢\公車能直達的站.csv",low_me
 route = pd.read_csv(r"C:\python\交通查詢\公車站行駛路線.csv",low_memory=False)
 all_bus = pd.read_csv(r"C:\python\交通查詢\公車站行駛路線.csv")
 
+
+# TODO: 演算法需要重構
 def has_bus(bus_station):
     bus_now = []
     bus_total = {}
