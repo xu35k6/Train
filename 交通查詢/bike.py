@@ -29,8 +29,7 @@ class TDX():
             'client_secret': self.client_secret
         }
         response = requests.post(token_url, headers=headers, data=data)
-        # print(response.status_code)
-        # print(response.json())
+
         return response.json()['access_token']
 
     def get_response(self, url):
@@ -66,7 +65,7 @@ def bike():
 
                 print('站名:',response_Station[i]['StationName']['Zh_tw'])
                 print('位置:',response_Station[i]['StationAddress']['Zh_tw'])
-                # https://www.google.com/maps/dir/'24.954042,121.22644'/24.957943,121.240201
+
         url = f"{base_url}{'/Availability'}{bike_url}?%24format=JSON"
         response_Availability = tdx.get_response(url)
         
@@ -78,12 +77,6 @@ def bike():
                 print('可還車數量:',response_Availability[i]['AvailableReturnBikes'],'輛')
                 google_map = f"{'https://www.google.com/maps/place/'}{response_Station[i]['StationPosition']['PositionLat']}{'+'}{response_Station[i]['StationPosition']['PositionLon']}"
                 print(google_map,'\n')
-        #該站可否租借
-        # if response_Availability[i]['AvailableRentBikes'] > 0:
-        #     hasbike[j] = True
-        # j += 1
-    # for j in hasbike:
-    #     print(j)
     return U_bike
 
 if __name__ == '__main__':
