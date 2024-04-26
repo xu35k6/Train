@@ -14,8 +14,8 @@ import random
 import math
 
 
-client_id = 's10811245-06dd52d5-3521-4239'
-client_secret = '88ab73bb-bb40-4117-bf56-877c8030ad75'
+client_id = ''
+client_secret = ''
 
 
 class TDX():
