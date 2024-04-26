@@ -23,7 +23,7 @@ def google_api(origins_Longitude,origins_Latitude,min_25):
         destinations += min_25[i][0]
         i+=1
     
-    url = f"https://maps.googleapis.com/maps/api/distancematrix/json?mode=walking&origins="+origins+"&destinations="+destinations+"&units=METRIC&key={google_api_key}"
+    url = f"https://maps.googleapis.com/maps/api/distancematrix/json?mode=walking&origins={origins}&destinations={destinations}&units=METRIC&key={google_api_key}"
     payload={}
     headers = {}
 
